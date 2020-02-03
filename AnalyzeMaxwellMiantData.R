@@ -15,8 +15,8 @@ if(cores > 1) {
   registerDoMC(cores)
 }
 # Read Maxwell 67 project raw data
-setwd("/media/user/1907USB/2020data") #TO BE CORRECTED
-Raw <- read.csv("Maxwell/maxwell67MainCasesTrainTestV10esFinal.csv", header = TRUE)
+#setwd("/media/user/1907USB/2020data") #use project home dir
+Raw <- read.csv("maxwell67MainCasesTrainTestV10esFinal.csv", header = TRUE)
 ## Only read the 'Train' data set,  remove case ID
 MaxwellTrain <-subset(Raw,case=="Train")
 dataID<-MaxwellTrain$id
@@ -139,17 +139,19 @@ histogram(~log(segMaxwellTrain$avetrans),
 nearZeroVar(segMaxwellTrain)
 #
 #filter on between predictor correlations
-correlations <- cor(segMaxwellTrain)
-dim(correlations)
-correlations[1:6, 1:6]
+NoRsegMaxwellTrain <- segMaxwellTrain[,-(12:21)] #remove those incomplete r col 
+NoRsegMaxwellTrain <- NoRsegMaxwellTrain[,-(7)] #remove the t column
+NoRcorrelations <- cor(NoRsegMaxwellTrain)
+dim(NoRcorrelations)
+NoRcorrelations[1:10, 1:10]
 #visualize
 library(corrplot)
-corrplot(correlations , order = "hclust") # error!
-highCorr <- findCorrelation(correlations, cutoff = .75) # error!
-length(highCorr) #error
+corrplot(NoRcorrelations , order = "hclust") 
+highCorr <- findCorrelation(NoRcorrelations, cutoff = .6)
+length(highCorr)
 head(highCorr)
-filteredSegMaxwellTrain <- segMaxwellTrain[ , -highCorr]
-###################END OF THE DAY 2020.1.31
+filteredNoRSegMaxwellTrain <- NoRsegMaxwellTrain[ , -highCorr]
+###################END OF THE DAY 2020.2.31
 # create new variables
 #
 # identify subset of cat variables 
@@ -159,9 +161,10 @@ filteredSegMaxwellTrain <- segMaxwellTrain[ , -highCorr]
 #
 #prelim analysis
 #1) histogram
-require(ggplot2)
-data(MaxwellData)
-head(MaxwellData)
-ggplot(data=MaxwellData) +geom_histogram(aes( x=time))
+package(ggplot2)
+#data(MaxwellTrain)
+head(MaxwellTrain)
+ggplot(data=MaxwellTrain) +geom_histogram(aes( x=totfp))
 #2) scatter plots
-ggplot(MaxwellData, aes(x= size , y= effort)) +geom_point()
+ggplot(MaxwellTrain, aes(x= totfp , y= acorreff)) +geom_point()
+
