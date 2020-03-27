@@ -99,6 +99,29 @@ hist(cpulev)
 #y1=ifelse(Analysis1$cpu<10,1,ifelse(Analysis1$cpu<99,2,ifelse(Analysis1$cpu<999,3,4)))
 hist(Analysis$y1)
 
+#another fei zzhengtai changes
+AnalysisTrain <- Analysis[,-(24:28)]
+AnalysisPP <- preProcess(AnalysisTrain , method = "BoxCox")
+AnalysisTrainTrans <- predict(AnalysisPP, AnalysisTrain)
+segPP$bc$totfp
+histogram(~AnalysisTrain$totfp,
+          xlab = "Natural Units",
+          type = "count")
+
+histogram(~AnalysisTrainTrans$totfp,
+          xlab = "Transformed Units",
+          ylab = " ",
+          type = "count")
+segPP$bc$acorreff
+histogram(~AnalysisTrain$acorreff,
+          xlab = "Natural Units",
+          type = "count")
+
+histogram(~AnalysisTrainTrans$acorreff,
+          xlab = "Transformed Units",
+          ylab = " ",
+          type = "count")
+
 
 
 #YES NO的语句可能用下一句
