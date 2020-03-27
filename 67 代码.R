@@ -121,8 +121,12 @@ histogram(~AnalysisTrainTrans$acorreff,
           xlab = "Transformed Units",
           ylab = " ",
           type = "count")
-
-
+lm.fit=lm(acorreff ~ totfp , data=AnalysisTrainTrans)
+lm.fit
+summary(lm.fit)
+names(lm.fit)
+coef(lm.fit)
+confint(lm.fit)
 
 #YES NO的语句可能用下一句
 #若x的值包含在1里面，输出yes，否者输出no

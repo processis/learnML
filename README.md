@@ -26,3 +26,7 @@ histogram(~AnalysisTrainTrans$acorreff,
           xlab = "Transformed Units",
           ylab = " ",
           type = "count")
+          
+lm.fit=lm(acorreff ~ totfp , data=AnalysisTrainTrans)
+lm.fit
+summary(lm.fit)
