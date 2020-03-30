@@ -30,3 +30,6 @@ histogram(~AnalysisTrainTrans$acorreff,
 lm.fit=lm(acorreff ~ totfp , data=AnalysisTrainTrans)
 lm.fit
 summary(lm.fit)
+
+#0330 67 ch3.5 and ya bianliang fenli shujubiao
+maxwell670330.csv

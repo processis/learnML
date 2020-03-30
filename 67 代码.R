@@ -5,6 +5,8 @@
 Analysis=read.csv("Maxwell67MainCasesTrainTestV10esFinal.CSV")
 fix(Analysis)
 names(Analysis)
+fix(AnalysisTrainTrans)
+
 
 #二：数据分析
 #对数据简单分析,summary提供最小值、下四分位数、中位数、平均值、上四分位数、最大值
@@ -15,7 +17,7 @@ summary(Analysis)
 #总数,因为不全为数值，所以要删掉一些
 #Analysis3<-Analysis[,-c(22:26)] 
 #Analysis3<-Analysis[-c(22:26),] 
-Analysis2=read.csv("67AnalysisV04.csv")
+Analysis2=read.csv("67AnalysisV05.csv")
 fix(Analysis2)
 sum(Analysis$r1)
 
@@ -216,4 +218,70 @@ summary(lm.fit1)
 library(rgl)
 plot3d(Girth,Height,Volume)
 
+
+
+#3.5copy
+AnalysisTrain2 <- Analysis2[,-(24:28)]
+AnalysisPP2 <- preProcess(AnalysisTrain2 , method = "BoxCox")
+AnalysisTrainTrans2 <- predict(AnalysisPP2, AnalysisTrain2)
+
+AnalysisCorr <- cor(AnalysisTrainTrans2)
+
+library(corrplot)
+corrplot(AnalysisCorr, order = "hclust", tl.cex = .35)
+
+highCorr2 <- findCorrelation(segCorr, .75)
+
+#3.8copy
+Analysis=read.csv("Maxwell67MainCasesTrainTestV10esFinal.CSV")
+summary(Analysis$apptype)
+summary(Analysis$borg)
+summary(Analysis$morg)
+summary(Analysis$dbms)
+summary(Analysis$tpms)
+Analysistype <- c("BackOff", "Connect", "Core", "Core")
+Analysis$apptype1 <- factor(apply(Analysis[, 29:32], 1, function(x) Analysistype[which(x == 1)]))
+
+AnalysisSubset <- Analysis[sample(1:nrow(Analysis), 20), c(1, 2, 19)]
+head(AnalysisSubset)
+
+levels(AnalysisSubset$apptype1)
+
+AnalysissimpleMod <- dummyVars(~totfp + apptype1,
+                       data = Analysis,
+                       ## Remove the variable name from the
+                       ## column name
+                       levelsOnly = TRUE)
+
+AnalysissimpleMod
+
+AnalysiswithInteraction <- dummyVars(~totfp + apptype1 + totfp:apptype1,
+                             data = Analysis,
+                             levelsOnly = TRUE)
+AnalysiswithInteraction
+predict(AnalysiswithInteraction, head(AnalysisSubset))
+
+
+#ch4copy
+## Split the data into training (80%) and test sets (20%)
+set.seed(100)
+AnalysisinTrain <- createDataPartition(Analysis$case, p = .8)[[1]]
+AnalysisTrain <- Analysis[ AnalysisinTrain, ]
+AnalysisTest  <- Analysis[-AnalysisinTrain, ]
+
+library(kernlab)
+set.seed(231)
+
+AnalysissigDist <- sigest(case ~ ., data = AnalysisinTrain, frac = 1)
+AnalysissvmTuneGrid <- data.frame(sigma = as.vector(sigDist)[1], C = 2^(-2:7))
+
+set.seed(1056)
+AnalysissvmFit <- train(case ~ .,
+                data = AnalysisinTrain,
+                method = "svmRadial",
+                preProc = c("center", "scale"),
+                tuneGrid = svmTuneGrid,
+                trControl = trainControl(method = "repeatedcv", 
+                                         repeats = 5,
+                                         classProbs = TRUE))
 
