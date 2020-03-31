@@ -233,7 +233,7 @@ corrplot(AnalysisCorr, order = "hclust", tl.cex = .35)
 highCorr2 <- findCorrelation(segCorr, .75)
 
 #3.8copy
-Analysis=read.csv("Maxwell67MainCasesTrainTestV10esFinal.CSV")
+Analysis=read.csv("67MainCasesAnalysis3.30(2cust)-MT练习.xlsx")
 summary(Analysis$apptype)
 summary(Analysis$borg)
 summary(Analysis$morg)
@@ -284,4 +284,51 @@ AnalysissvmFit <- train(case ~ .,
                 trControl = trainControl(method = "repeatedcv", 
                                          repeats = 5,
                                          classProbs = TRUE))
+#ch5copy
+Analysis=read.csv("67MainCasesAnalysis3.30(2cust)-MT练习.csv")
+AnaresidualValues<-Analysis$acorreff-Analysis$totfp
+summary(AnaresidualValues)
+AnaaxisRange<-extendrange(c(Analysis$acorreff,Analysis$totfp))
+plot(Analysis$acorreff,Analysis$totfp,
+     ylim=AnaaxisRange,
+     xlim=AnaaxisRange)
+plot(Analysis$acorreff,Analysis$totfp,ylab="Anaresidual")
+abline(0,1,col="darkgrey",lty=2)
+
+R2(Analysis$acorreff,Analysis$totfp)
+RMSE(Analysis$acorreff,Analysis$totfp)
+cor(Analysis$acorreff,Analysis$totfp)
+cor(Analysis$acorreff,Analysis$totfp,method="spearman")
+
+
+#ch6copy
+library(MASS)
+library(ggplot2)
+library(pls)
+Analysis=read.csv("67MainCasesAnalysis3.30(2cust)-MT练习.csv")
+library(lattice)
+set.seed(100)
+library(caret)
+AnalysisinTrain <- createDataPartition(Analysis$case, p = .8)[[1]]
+AnalysisTrain <- Analysis[ AnalysisinTrain, ]
+AnalysisTest  <- Analysis[-AnalysisinTrain, ]
+
+set.seed(2)
+sample(names(AnalysisTrain),8)
+
+AnatrainingData<-AnalysisTrain
+
+lmfitallpredictors<-lm(totpf~.,data=AnalysisTrain)
+summary(lmfitallpredictors)
+lmpredl<-predict(lmfitallpredictors,AnalysisTest)
+head(lmpredl)
+lmvalues1<-data.frame(obs=AnalysisTrain$acorreff,pred=lmpredl)
+defaultSummary(lmvalues1)
+
+
+rlmlmfitallpredictors<-lm(totpf~.,data=AnalysisTrain)
+anactrl<-trainControl(method="cv",number=10)
+set.seed(100)
+lmfit1<-train(x=AnalysisTrain,y=AnalysisTrain$totfp,
+              method="lm",trControl=anactrl)
 

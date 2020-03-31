@@ -33,3 +33,7 @@ summary(lm.fit)
 
 #0330 67 ch3.5 and ya bianliang fenli shujubiao
 maxwell670330.csv
+
+#0331 codes
+ch5 67 pratice success
+ch6 havs problems

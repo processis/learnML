@@ -34,6 +34,7 @@
 
 library(AppliedPredictiveModeling)
 data(solubility)
+names(trainingData)
 
 library(lattice)
 
@@ -198,4 +199,118 @@ sessionInfo()
 q("no")
 
 
+#ch6 shu
+library(MASS)
+library(ggplot2)
+library(pls)
+library(caret)
+library(AppliedPredictiveModeling)
+data(solubility)
+names(trainingData)
+ls(pattern="solT")
 
+
+set.seed(2)
+sample(names(solTrainX),8)
+
+trainingData<-solTrainXtrans
+trainingData$Solubility<-solTrainY
+
+
+lmfitallpredictors<-lm(Solubility~.,data=trainingData)
+summary(lmfitallpredictors)
+
+lmpredl<-predict(lmfitallpredictors,solTestXtrans)
+head(lmpredl)
+lmvalues1<-data.frame(obs=solTrainY,pred=lmpredl)
+defaultSummary(lmvalues1)
+
+rlmlmfitallpredictors<-lm(Solubility~.,data=trainingData)
+ctrl<-trainControl(method="cv",number=10)
+set.seed(100)
+lmfit1<-train(x=solTrainXtrans,y=solTestY,
+              method="lm",trControl=ctrl)
+
+xyplot(solTrainY~predice(lmfit1),
+       type=c("p","g"),
+       xlab="predicted",y="observed")
+
+xyplot(resid(lmfit1)~predice(lmfit1),
+       type=c("p","g"),
+       xlab="predicted",y="residuals")
+
+corThresh<-.9
+tooHigh<-findCorrelation(cor(solTrainXtrans),corThresh)
+corrPred<-names(solTrainXtrans)[tooHigh]
+trainfiltered<-solTrainXtrans[,-tooHigh]
+
+set.seed(100)
+lmfiltered<-train(trainXfiltered,solTrainY,method="lm",
+                  trControl=ctrl)
+lmfiltered
+
+set.seed(100)
+rlmPCA<-train(solTrainXtrans,solTrainY,
+              method="rlm",
+              preProcess = "pca",
+              trControl = ctrl)
+rlmPCA
+
+plsFit<-plsr(Solubility~.,data=trainingData)
+predict(plsFit,solTestXtrans[1:5],ncomp=1:2)
+
+set.seed(100)
+plsTune<-train(solTrainXtrans,solTrainY,
+               method="pls",
+               tuneLength = 20,
+               trControl = ctrl,
+               preProc=c("center","scale"))
+
+ridgeModel<-enet(x=as.matrix(solTrainXtrans),
+                 y=solTrainY,lambda=0.01)
+
+ridgePred<-predict(ridgeModel,newx=as.matrix(solTestXtrans),
+                   s=1,mode="fraction",
+                   type="fit")
+head(ridgePred)
+
+ridgeGrid
+
+ridgeGrid <- expand.grid(lambda = seq(0, .1, length = 15))
+
+set.seed(100)
+ridgeTune <- train(x = solTrainXtrans, y = solTrainY,
+                   method = "ridge",
+                   tuneGrid = ridgeGrid,
+                   trControl = ctrl,
+                   preProc = c("center", "scale"))
+
+enetModel<-enet(x=as.matrix(solTrainXtrans),
+                y=solTrainY,
+                lambda=0.01,normalize=TRUE)
+
+enetPred<-predict(enetModel,newx=as.matrix(solTrainXtrans),
+                  s=.1,mode="fraction",
+                  type="fit")
+
+names(enetPred)
+
+head(enetPred$fit)
+
+enetCoef<-predict(enetModel,newx=as.matrix(solTestXtrans),
+                  s=.1,mode="fraction",
+                  type="coefficients")
+
+tail(enetCoef$coefficients)
+
+enetGrid <- expand.grid(lambda = c(0, 0.01, .1), 
+                        fraction = seq(.05, 1, length = 20))
+set.seed(100)
+enetTune <- train(x = solTrainXtrans, y = solTrainY,
+                  method = "enet",
+                  tuneGrid = enetGrid,
+                  trControl = ctrl,
+                  preProc = c("center", "scale"))
+enetTune
+
+plot(enetTune)
