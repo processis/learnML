@@ -31,9 +31,9 @@ lm.fit=lm(acorreff ~ totfp , data=AnalysisTrainTrans)
 lm.fit
 summary(lm.fit)
 
-#0330 67 ch3.5 and ya bianliang fenli shujubiao
+#0330 67 ch3.5 之前所有的数据+哑变量分离数据
 maxwell670330.csv
 
-#0331 codes
+#0331 codes 0330的数据包分为train和test
 ch5 67 pratice success
 ch6 havs problems
