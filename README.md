@@ -1,4 +1,4 @@
-# learnML
+﻿# learnML
 learn Machine Learning usng R
 ## 2020.3.26  
 * try maxwell326es from Shelly Minitab output
@@ -37,3 +37,10 @@ maxwell670330.csv
 #0331 codes 0330的数据包分为train和test
 ch5 67 pratice success
 ch6 havs problems
+
+#0403
+最初的数据：Maxwell67MainCasesTrainTestV10esFinal.CSV
+新增变量后的数据：67MainCasesAnalysis3.30(2cust).CSV
+R的代码：67练习.R
+minitab结果过程与截图：max67操作步骤及结果.docx
+wiki词条：ma中Maxweill 67 minitab步骤
