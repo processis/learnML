@@ -1,0 +1,697 @@
+> library(AppliedPredictiveModeling)
+> data(concrete)
+> 
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> library(plyr)
+> 
+> featurePlot(concrete[, -9], concrete$CompressiveStrength,
++             between = list(x = 1, y = 1),
++             type = c("g", "p", "smooth"))
+> 
+> 
+> ################################################################################
+> ### Section 10.1 Model Building Strategy
+> ### There are replicated mixtures, so take the average per mixture
+>             
+> averaged <- ddply(mixtures,
++                   .(Cement, BlastFurnaceSlag, FlyAsh, Water, 
++                     Superplasticizer, CoarseAggregate, 
++                     FineAggregate, Age),
++                   function(x) c(CompressiveStrength = 
++                     mean(x$CompressiveStrength)))
+> 
+> ### Split the data and create a control object for train()
+> 
+> set.seed(975)
+> inTrain <- createDataPartition(averaged$CompressiveStrength, p = 3/4)[[1]]
+> training <- averaged[ inTrain,]
+> testing  <- averaged[-inTrain,]
+> 
+> ctrl <- trainControl(method = "repeatedcv", repeats = 5, number = 10)
+> 
+> ### Create a model formula that can be used repeatedly
+> 
+> modForm <- paste("CompressiveStrength ~ (.)^2 + I(Cement^2) + I(BlastFurnaceSlag^2) +",
++                  "I(FlyAsh^2)  + I(Water^2) + I(Superplasticizer^2)  +",
++                  "I(CoarseAggregate^2) +  I(FineAggregate^2) + I(Age^2)")
+> modForm <- as.formula(modForm)
+> 
+> ### Fit the various models
+> 
+> ### Optional: parallel processing can be used via the 'do' packages,
+> ### such as doMC, doMPI etc. We used doMC (not on Windows) to speed
+> ### up the computations.
+> 
+> ### WARNING: Be aware of how much memory is needed to parallel
+> ### process. It can very quickly overwhelm the available hardware. The
+> ### estimate of the median memory usage (VSIZE = total memory size) 
+> ### was 2800M for a core although the M5 calculations require about 
+> ### 3700M without parallel processing. 
+> 
+> ### WARNING 2: The RWeka package does not work well with some forms of
+> ### parallel processing, such as mutlicore (i.e. doMC). 
+> 
+> library(doMC)
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> registerDoMC(4)
+> 
+> set.seed(669)
+> lmFit <- train(modForm, data = training,
++                method = "lm",
++                trControl = ctrl)
+> 
+> set.seed(669)
+> plsFit <- train(modForm, data = training,
++                 method = "pls",
++                 preProc = c("center", "scale"),
++                 tuneLength = 15,
++                 trControl = ctrl)
+> 
+> lassoGrid <- expand.grid(lambda = c(0, .001, .01, .1), 
++                          fraction = seq(0.05, 1, length = 20))
+> set.seed(669)
+> lassoFit <- train(modForm, data = training,
++                   method = "enet",
++                   preProc = c("center", "scale"),
++                   tuneGrid = lassoGrid,
++                   trControl = ctrl)
+> 
+> set.seed(669)
+> earthFit <- train(CompressiveStrength ~ ., data = training,
++                   method = "earth",
++                   tuneGrid = expand.grid(degree = 1, 
++                                          nprune = 2:25),
++                   trControl = ctrl)
+Loading required package: earth
+Loading required package: Formula
+Loading required package: plotmo
+Loading required package: plotrix
+Loading required package: TeachingDemos
+> 
+> set.seed(669)
+> svmRFit <- train(CompressiveStrength ~ ., data = training,
++                  method = "svmRadial",
++                  tuneLength = 15,
++                  preProc = c("center", "scale"),
++                  trControl = ctrl)
+> 
+> 
+> nnetGrid <- expand.grid(decay = c(0.001, .01, .1), 
++                         size = seq(1, 27, by = 2), 
++                         bag = FALSE)
+> set.seed(669)
+> nnetFit <- train(CompressiveStrength ~ .,
++                  data = training,
++                  method = "avNNet",
++                  tuneGrid = nnetGrid,
++                  preProc = c("center", "scale"),
++                  linout = TRUE,
++                  trace = FALSE,
++                  maxit = 1000,
++                  allowParallel = FALSE,
++                  trControl = ctrl)
+> set.seed(669)
+> rpartFit <- train(CompressiveStrength ~ .,
++                   data = training,
++                   method = "rpart",
++                   tuneLength = 30,
++                   trControl = ctrl)
+Warning message:
+In nominalTrainWorkflow(x = x, y = y, wts = weights, info = trainInfo,  :
+  There were missing values in resampled performance measures.
+> set.seed(669)
+> treebagFit <- train(CompressiveStrength ~ .,
++                     data = training,
++                     method = "treebag",
++                     trControl = ctrl)
+> set.seed(669)
+> ctreeFit <- train(CompressiveStrength ~ .,
++                   data = training,
++                   method = "ctree",
++                   tuneLength = 10,
++                   trControl = ctrl)
+1 package is needed for this model and is not installed. (party). Would you like to try to install it now?
+1: yes
+2: no
+
+Selection: yes
+Installing package into ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘TH.data’, ‘multcomp’, ‘strucchange’, ‘coin’, ‘sandwich’
+
+trying URL 'https://cloud.r-project.org/src/contrib/TH.data_1.0-10.tar.gz'
+Content type 'application/x-gzip' length 8238275 bytes (7.9 MB)
+==================================================
+downloaded 7.9 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/multcomp_1.4-12.tar.gz'
+Content type 'application/x-gzip' length 609805 bytes (595 KB)
+==================================================
+downloaded 595 KB
+
+trying URL 'https://cloud.r-project.org/src/contrib/strucchange_1.5-2.tar.gz'
+Content type 'application/x-gzip' length 544106 bytes (531 KB)
+==================================================
+downloaded 531 KB
+
+trying URL 'https://cloud.r-project.org/src/contrib/coin_1.3-1.tar.gz'
+Content type 'application/x-gzip' length 1263884 bytes (1.2 MB)
+==================================================
+downloaded 1.2 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/sandwich_2.5-1.tar.gz'
+Content type 'application/x-gzip' length 1349536 bytes (1.3 MB)
+==================================================
+downloaded 1.3 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/party_1.3-4.tar.gz'
+Content type 'application/x-gzip' length 734243 bytes (717 KB)
+==================================================
+downloaded 717 KB
+
+* installing *source* package ‘TH.data’ ...
+** package ‘TH.data’ successfully unpacked and MD5 sums checked
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded
+* DONE (TH.data)
+* installing *source* package ‘sandwich’ ...
+** package ‘sandwich’ successfully unpacked and MD5 sums checked
+** R
+** data
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (sandwich)
+* installing *source* package ‘multcomp’ ...
+** package ‘multcomp’ successfully unpacked and MD5 sums checked
+** R
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (multcomp)
+* installing *source* package ‘strucchange’ ...
+** package ‘strucchange’ successfully unpacked and MD5 sums checked
+** libs
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c strucchange_functions.c -o strucchange_functions.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c strucchange_init.c -o strucchange_init.o
+gcc -std=gnu99 -shared -L/usr/lib/R/lib -Wl,-z,relro -o strucchange.so strucchange_functions.o strucchange_init.o -llapack -lblas -lgfortran -lm -lquadmath -L/usr/lib/R/lib -lR
+installing to /home/user/R/x86_64-pc-linux-gnu-library/3.5/strucchange/libs
+** R
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (strucchange)
+* installing *source* package ‘coin’ ...
+** package ‘coin’ successfully unpacked and MD5 sums checked
+** libs
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/libcoin/include"   -fvisibility=hidden -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Helpers.c -o Helpers.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/libcoin/include"   -fvisibility=hidden -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c StreitbergRoehmel.c -o StreitbergRoehmel.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/libcoin/include"   -fvisibility=hidden -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c coin-init.c -o coin-init.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/libcoin/include"   -fvisibility=hidden -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c vandeWiel.c -o vandeWiel.o
+gcc -std=gnu99 -shared -L/usr/lib/R/lib -Wl,-z,relro -o coin.so Helpers.o StreitbergRoehmel.o coin-init.o vandeWiel.o -lblas -lgfortran -lm -lquadmath -L/usr/lib/R/lib -lR
+installing to /home/user/R/x86_64-pc-linux-gnu-library/3.5/coin/libs
+** R
+** data
+*** moving datasets to lazyload DB
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (coin)
+* installing *source* package ‘party’ ...
+** package ‘party’ successfully unpacked and MD5 sums checked
+** libs
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Classes.c -o Classes.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Convenience.c -o Convenience.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Distributions.c -o Distributions.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c IndependenceTest.c -o IndependenceTest.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c LinearStatistic.c -o LinearStatistic.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Memory.c -o Memory.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Node.c -o Node.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Predict.c -o Predict.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c RandomForest.c -o RandomForest.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c S3Classes.c -o S3Classes.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Splits.c -o Splits.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c SurrogateSplits.c -o SurrogateSplits.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c TestStatistic.c -o TestStatistic.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c TreeGrow.c -o TreeGrow.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c Utils.c -o Utils.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG  -I"/home/user/R/x86_64-pc-linux-gnu-library/3.5/mvtnorm/include"    -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c init.c -o init.o
+gcc -std=gnu99 -shared -L/usr/lib/R/lib -Wl,-z,relro -o party.so Classes.o Convenience.o Distributions.o IndependenceTest.o LinearStatistic.o Memory.o Node.o Predict.o RandomForest.o S3Classes.o Splits.o SurrogateSplits.o TestStatistic.o TreeGrow.o Utils.o init.o -llapack -lblas -lgfortran -lm -lquadmath -L/usr/lib/R/lib -lR
+installing to /home/user/R/x86_64-pc-linux-gnu-library/3.5/party/libs
+** R
+** data
+*** moving datasets to lazyload DB
+** demo
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (party)
+
+The downloaded source packages are in
+	‘/tmp/RtmplyYZdi/downloaded_packages’
+> set.seed(669)
+> rfFit <- train(CompressiveStrength ~ .,
++                data = training,
++                method = "rf",
++                tuneLength = 10,
++                ntrees = 1000,
++                importance = TRUE,
++                trControl = ctrl)
+note: only 7 unique complexity parameters in default grid. Truncating the grid to 7 .
+
+> gbmGrid <- expand.grid(interaction.depth = seq(1, 7, by = 2),
++                        n.trees = seq(100, 1000, by = 50),
++                        shrinkage = c(0.01, 0.1))
+> set.seed(669)
+> gbmFit <- train(CompressiveStrength ~ .,
++                 data = training,
++                 method = "gbm",
++                 tuneGrid = gbmGrid,
++                 verbose = FALSE,
++                 trControl = ctrl)
+1 package is needed for this model and is not installed. (gbm). Would you like to try to install it now?
+1: yes
+2: no
+
+Selection: yes
+Installing package into ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5’
+(as ‘lib’ is unspecified)
+also installing the dependency ‘gridExtra’
+
+trying URL 'https://cloud.r-project.org/src/contrib/gridExtra_2.3.tar.gz'
+Content type 'application/x-gzip' length 1062844 bytes (1.0 MB)
+==================================================
+downloaded 1.0 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/gbm_2.1.5.tar.gz'
+Content type 'application/x-gzip' length 442005 bytes (431 KB)
+==================================================
+downloaded 431 KB
+
+* installing *source* package ‘gridExtra’ ...
+** package ‘gridExtra’ successfully unpacked and MD5 sums checked
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (gridExtra)
+* installing *source* package ‘gbm’ ...
+** package ‘gbm’ successfully unpacked and MD5 sums checked
+** libs
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c adaboost.cpp -o adaboost.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c bernoulli.cpp -o bernoulli.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c coxph.cpp -o coxph.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c dataset.cpp -o dataset.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c distribution.cpp -o distribution.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c gaussian.cpp -o gaussian.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c gbm-init.c -o gbm-init.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c gbm.cpp -o gbm.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c gbm_engine.cpp -o gbm_engine.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c gbmentry.cpp -o gbmentry.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c huberized.cpp -o huberized.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c laplace.cpp -o laplace.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c locationm.cpp -o locationm.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c multinomial.cpp -o multinomial.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node.cpp -o node.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_categorical.cpp -o node_categorical.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_continuous.cpp -o node_continuous.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_factory.cpp -o node_factory.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_nonterminal.cpp -o node_nonterminal.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_search.cpp -o node_search.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c node_terminal.cpp -o node_terminal.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c pairwise.cpp -o pairwise.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c poisson.cpp -o poisson.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c quantile.cpp -o quantile.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c tdist.cpp -o tdist.o
+g++  -I"/usr/share/R/include" -DNDEBUG      -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c tree.cpp -o tree.o
+g++ -shared -L/usr/lib/R/lib -Wl,-z,relro -o gbm.so adaboost.o bernoulli.o coxph.o dataset.o distribution.o gaussian.o gbm-init.o gbm.o gbm_engine.o gbmentry.o huberized.o laplace.o locationm.o multinomial.o node.o node_categorical.o node_continuous.o node_factory.o node_nonterminal.o node_search.o node_terminal.o pairwise.o poisson.o quantile.o tdist.o tree.o -L/usr/lib/R/lib -lR
+installing to /home/user/R/x86_64-pc-linux-gnu-library/3.5/gbm/libs
+** R
+** demo
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (gbm)
+
+The downloaded source packages are in
+	‘/tmp/RtmplyYZdi/downloaded_packages’
+Error: The tuning parameter grid should have columns n.trees, interaction.depth, shrinkage, n.minobsinnode
+> cbGrid <- expand.grid(committees = c(1, 5, 10, 50, 75, 100), 
++                       neighbors = c(0, 1, 3, 5, 7, 9))
+> set.seed(669)
+> cbFit <- train(CompressiveStrength ~ .,
++                data = training,
++                method = "cubist",
++                tuneGrid = cbGrid,
++                trControl = ctrl)
+1 package is needed for this model and is not installed. (Cubist). Would you like to try to install it now?
+1: yes
+2: no
+
+Selection: yes
+Installing package into ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5’
+(as ‘lib’ is unspecified)
+trying URL 'https://cloud.r-project.org/src/contrib/Cubist_0.2.3.tar.gz'
+Content type 'application/x-gzip' length 463513 bytes (452 KB)
+==================================================
+downloaded 452 KB
+
+* installing *source* package ‘Cubist’ ...
+** package ‘Cubist’ successfully unpacked and MD5 sums checked
+checking for gcc... gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+configure: creating ./config.status
+config.status: creating src/Makevars
+** libs
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c construct.c -o construct.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c contin.c -o contin.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c discr.c -o discr.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c formrules.c -o formrules.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c formtree.c -o formtree.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c getdata.c -o getdata.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c getnames.c -o getnames.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c global.c -o global.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c hash.c -o hash.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c implicitatt.c -o implicitatt.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c instance.c -o instance.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c modelfiles.c -o modelfiles.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c predict.c -o predict.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c prunetree.c -o prunetree.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c rcubist.c -o rcubist.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c redefine.c -o redefine.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c regress.c -o regress.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c rsample.c -o rsample.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c rulebasedmodels.c -o rulebasedmodels.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c rules.c -o rules.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c sample.c -o sample.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c sort.c -o sort.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c stats.c -o stats.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c strbuf.c -o strbuf.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c top.c -o top.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c trees.c -o trees.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c update.c -o update.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c utility.c -o utility.o
+gcc -std=gnu99 -I"/usr/share/R/include" -DNDEBUG -DNDEBUG    -g -fpic  -g -O2 -fdebug-prefix-map=/build/r-base-3.5.2=. -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g  -c xval.c -o xval.o
+gcc -std=gnu99 -shared -L/usr/lib/R/lib -Wl,-z,relro -o Cubist.so construct.o contin.o discr.o formrules.o formtree.o getdata.o getnames.o global.o hash.o implicitatt.o instance.o modelfiles.o predict.o prunetree.o rcubist.o redefine.o regress.o rsample.o rulebasedmodels.o rules.o sample.o sort.o stats.o strbuf.o top.o trees.o update.o utility.o xval.o -L/usr/lib/R/lib -lR
+installing to /home/user/R/x86_64-pc-linux-gnu-library/3.5/Cubist/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** installing vignettes
+** testing if installed package can be loaded
+* DONE (Cubist)
+
+The downloaded source packages are in
+	‘/tmp/RtmplyYZdi/downloaded_packages’
+> registerDoSEQ()
+> set.seed(669)
+> mtFit <- train(CompressiveStrength ~ .,
++                data = training,
++                method = "M5",
++                trControl = ctrl)
+1 package is needed for this model and is not installed. (RWeka). Would you like to try to install it now?
+1: yes
+2: no
+
+Selection: yes
+Installing package into ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘RWekajars’, ‘rJava’
+
+trying URL 'https://cloud.r-project.org/src/contrib/RWekajars_3.9.3-2.tar.gz'
+Content type 'application/x-gzip' length 10030557 bytes (9.6 MB)
+==================================================
+downloaded 9.6 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/rJava_0.9-12.tar.gz'
+Content type 'application/x-gzip' length 1103629 bytes (1.1 MB)
+==================================================
+downloaded 1.1 MB
+
+trying URL 'https://cloud.r-project.org/src/contrib/RWeka_0.4-42.tar.gz'
+Content type 'application/x-gzip' length 415836 bytes (406 KB)
+==================================================
+downloaded 406 KB
+
+* installing *source* package ‘rJava’ ...
+** package ‘rJava’ successfully unpacked and MD5 sums checked
+checking for gcc... gcc -std=gnu99
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc -std=gnu99 accepts -g... yes
+checking for gcc -std=gnu99 option to accept ISO C89... none needed
+checking how to run the C preprocessor... gcc -std=gnu99 -E
+checking for grep that handles long lines and -e... /usr/bin/grep
+checking for egrep... /usr/bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/wait.h that is POSIX.1 compatible... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for string.h... (cached) yes
+checking sys/time.h usability... yes
+checking sys/time.h presence... yes
+checking for sys/time.h... yes
+checking for unistd.h... (cached) yes
+checking for an ANSI C-conforming const... yes
+checking whether time.h and sys/time.h may both be included... yes
+configure: checking whether gcc -std=gnu99 supports static inline...
+yes
+checking whether setjmp.h is POSIX.1 compatible... yes
+checking whether sigsetjmp is declared... yes
+checking whether siglongjmp is declared... yes
+checking Java support in R... present:
+interpreter : '/usr/lib/jvm/default-java/bin/java'
+archiver    : '/usr/lib/jvm/default-java/bin/jar'
+compiler    : '/usr/lib/jvm/default-java/bin/javac'
+header prep.: ''
+cpp flags   : '-I/usr/lib/jvm/default-java/include -I/usr/lib/jvm/default-java/include/linux'
+java libs   : '-L/usr/lib/jvm/default-java/lib/server -ljvm'
+checking whether Java run-time works... yes
+checking whether -Xrs is supported... yes
+checking whether -Xrs will be used... yes
+checking whether JVM will be loaded dynamically... no
+checking whether JNI programs can be compiled... configure: error: Cannot compile a simple JNI program. See config.log for details.
+
+Make sure you have Java Development Kit installed and correctly registered in R.
+If in doubt, re-run "R CMD javareconf" as root.
+
+ERROR: configuration failed for package ‘rJava’
+* removing ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5/rJava’
+ERROR: dependency ‘rJava’ is not available for package ‘RWekajars’
+* removing ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5/RWekajars’
+ERROR: dependencies ‘RWekajars’, ‘rJava’ are not available for package ‘RWeka’
+* removing ‘/home/user/R/x86_64-pc-linux-gnu-library/3.5/RWeka’
+
+The downloaded source packages are in
+	‘/tmp/RtmplyYZdi/downloaded_packages’
+Error: package RWeka is required
+In addition: Warning messages:
+1: In install.packages(pkg[!good]) :
+  installation of package ‘rJava’ had non-zero exit status
+2: In install.packages(pkg[!good]) :
+  installation of package ‘RWekajars’ had non-zero exit status
+3: In install.packages(pkg[!good]) :
+  installation of package ‘RWeka’ had non-zero exit status
+> rs <- resamples(list("Linear Reg" = lmFit, "
++                      PLS" = plsFit,
++                      "Elastic Net" = lassoFit, 
++                      MARS = earthFit,
++                      SVM = svmRFit, 
++                      "Neural Networks" = nnetFit,
++                      CART = rpartFit, 
++                      "Cond Inf Tree" = ctreeFit,
++                      "Bagged Tree" = treebagFit,
++                      "Boosted Tree" = gbmFit,
++                      "Random Forest" = rfFit,
++                      Cubist = cbFit))
+Error in resamples(list(`Linear Reg` = lmFit, `\n                     PLS` = plsFit,  : 
+  object 'gbmFit' not found
+> nnetPred <- predict(nnetFit, testing)
+> gbmPred <- predict(gbmFit, testing)
+Error in predict(gbmFit, testing) : object 'gbmFit' not found
+> cbPred <- predict(cbFit, testing)
+> gbmFit <- train(CompressiveStrength ~ .,
++                 data = training,
++                 method = "gbm",
++                 tuneGrid = gbmGrid,
++                 verbose = FALSE,
++                 trControl = ctrl)
+Error: The tuning parameter grid should have columns n.trees, interaction.depth, shrinkage, n.minobsinnode
+> testResults <- rbind(postResample(nnetPred, testing$CompressiveStrength),
++                      postResample(gbmPred, testing$CompressiveStrength),
++                      postResample(cbPred, testing$CompressiveStrength))
+Error in postResample(gbmPred, testing$CompressiveStrength) : 
+  object 'gbmPred' not found
+> testResults <- as.data.frame(testResults)
+Error in as.data.frame(testResults) : object 'testResults' not found
+> testResults$Model <- c("Neural Networks", "Boosted Tree", "Cubist")
+Error in testResults$Model <- c("Neural Networks", "Boosted Tree", "Cubist") : 
+  object 'testResults' not found
+> testResults <- testResults[order(testResults$RMSE),]
+Error: object 'testResults' not found
+> library(proxy)
+
+Attaching package: ‘proxy’
+
+The following objects are masked from ‘package:stats’:
+
+    as.dist, dist
+
+The following object is masked from ‘package:base’:
+
+    as.matrix
+
+> modelPrediction <- function(x, mod, limit = 2500)
++ {
++   if(x[1] < 0 | x[1] > 1) return(10^38)
++   if(x[2] < 0 | x[2] > 1) return(10^38)
++   if(x[3] < 0 | x[3] > 1) return(10^38)
++   if(x[4] < 0 | x[4] > 1) return(10^38)
++   if(x[5] < 0 | x[5] > 1) return(10^38)
++   if(x[6] < 0 | x[6] > 1) return(10^38)
++   
++   x <- c(x, 1 - sum(x))
++   
++   if(x[7] < 0.05) return(10^38)
++   
++   tmp <- as.data.frame(t(x))
++   names(tmp) <- c('Cement','BlastFurnaceSlag','FlyAsh',
++                   'Superplasticizer','CoarseAggregate',
++                   'FineAggregate', 'Water')
++   tmp$Age <- 28
++   -predict(mod, tmp)
++ }
+> subTrain <- subset(training, Age == 28)
+> pp1 <- preProcess(subTrain[, -(8:9)], c("center", "scale"))
+> scaledTrain <- predict(pp1, subTrain[, 1:7])
+> set.seed(91)
+> startMixture <- sample(1:nrow(subTrain), 1)
+> starters <- scaledTrain[startMixture, 1:7]
+> pool <- scaledTrain
+> index <- maxDissim(starters, pool, 14)
+> startPoints <- c(startMixture, index)
+> 
+> starters <- subTrain[startPoints,1:7]
+> startingValues <- starters[, -4]
+> cbResults <- startingValues
+> cbResults$Water <- NA
+> cbResults$Prediction <- NA
+> 
+> for(i in 1:nrow(cbResults))
++ {
++   results <- optim(unlist(cbResults[i,1:6]),
++                    modelPrediction,
++                    method = "Nelder-Mead",
++                    control=list(maxit=5000),
++                    mod = cbFit)
++   cbResults$Prediction[i] <- -results$value
++   cbResults[i,1:6] <- results$par
++ }
+> cbResults$Water <- 1 - apply(cbResults[,1:6], 1, sum)
+> cbResults <- subset(cbResults, Prediction > 0 & Water > .02)
+> cbResults <- cbResults[order(-cbResults$Prediction),][1:3,]
+> cbResults$Model <- "Cubist"
+> nnetResults <- startingValues
+> nnetResults$Water <- NA
+> nnetResults$Prediction <- NA
+> 
+> for(i in 1:nrow(nnetResults))
++ {
++   results <- optim(unlist(nnetResults[i, 1:6,]),
++                    modelPrediction,
++                    method = "Nelder-Mead",
++                    control=list(maxit=5000),
++                    mod = nnetFit)
++   nnetResults$Prediction[i] <- -results$value
++   nnetResults[i,1:6] <- results$par
++ }
+> nnetResults$Water <- 1 - apply(nnetResults[,1:6], 1, sum)
+> nnetResults <- subset(nnetResults, Prediction > 0 & Water > .02)
+> nnetResults <- nnetResults[order(-nnetResults$Prediction),][1:3,]
+> nnetResults$Model <- "NNet"
+> pp2 <- preProcess(subTrain[, 1:7], "pca")
+> pca1 <- predict(pp2, subTrain[, 1:7])
+> pca1$Data <- "Training Set"
+> pca1$Data[startPoints] <- "Starting Values"
+> pca3 <- predict(pp2, cbResults[, names(subTrain[, 1:7])])
+> pca3$Data <- "Cubist"
+> pca4 <- predict(pp2, nnetResults[, names(subTrain[, 1:7])])
+> pca4$Data <- "Neural Network"
+> pcaData <- rbind(pca1, pca3, pca4)
+> pcaData$Data <- factor(pcaData$Data,
++                        levels = c("Training Set","Starting Values",
++                                   "Cubist","Neural Network"))
+> lim <- extendrange(pcaData[, 1:2])
+> 
+> xyplot(PC2 ~ PC1, 
++        data = pcaData, 
++        groups = Data,
++        auto.key = list(columns = 2),
++        xlim = lim, 
++        ylim = lim,
++        type = c("g", "p"))
