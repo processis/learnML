@@ -45,5 +45,5 @@ R的代码：67练习.R
 minitab结果过程与截图：max67操作步骤及结果.docx
 wiki词条：ma中Maxweill 67 minitab步骤
 
-#502
+## 2020.5.2
 tried larose ch 2 3 code on cars , cars2 , churn
