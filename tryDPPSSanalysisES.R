@@ -1,0 +1,10 @@
+# Larose ch1 R code (p15)
+cars<- read.csv(file="/media/user/1907USB/RonGitHUB/Larose/data/cars.txt",stringsAsFactors = FALSE)
+cov(cars[1:3])
+cor(cars[1:3])
+DPPSS.OrdinalCsub<-DPPSSdata[,c(1,2,7,8)]
+cor(DPPSS.OrdinalCsub[1:4])
+cov(DPPSS.OrdinalCsub[1:4])
+chisq.test(DPPSSdata$Ship,DPPSSdata$Experience)
+chisq.test(DPPSSdata$Ship,DPPSSdata$Language)
+chisq.test(DPPSSdata$Ship,DPPSSdata$DomainExp)
