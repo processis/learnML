@@ -47,3 +47,4 @@ wiki词条：ma中Maxweill 67 minitab步骤
 
 ## 2020.5.2
 tried larose ch 2 3 code on cars , cars2 , churn
+try DPPSS cov(failed, due to ordinal), chisq.test similar result
