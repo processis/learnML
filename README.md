@@ -38,7 +38,7 @@ maxwell670330.csv
 ch5 67 pratice success
 ch6 havs problems
 
-#0403
+##2020.04.03
 最初的数据：Maxwell67MainCasesTrainTestV10esFinal.CSV
 新增变量后的数据：67MainCasesAnalysis3.30(2cust).CSV
 R的代码：67练习.R
@@ -48,3 +48,13 @@ wiki词条：ma中Maxweill 67 minitab步骤
 ## 2020.5.2
 tried larose ch 2 3 code on cars , cars2 , churn
 try DPPSS cov(failed, due to ordinal), chisq.test similar result
+
+## 2020.5.3
+tried graphicsCookbookCh356.R -> Shelly , please complete...
+
+## 2020.5.5
+try Kuhn caret using dummy var to find the multi var LR for Maxwell 67data from
+67MainCasesAnalysis202005dummyVar
+
+
+
