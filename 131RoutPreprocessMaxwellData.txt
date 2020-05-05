@@ -1,0 +1,326 @@
+﻿
+
+R version 3.5.2 (2018-12-20) -- "Eggshell Igloo"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Workspace loaded from /media/user/1907USB/RonGitHUB/learnML/.RData]
+
+> cores <- 2
+> 
+> if(cores > 1) {
++   library(doMC)
++   registerDoMC(cores)
++ }
+Loading required package: foreach
+Loading required package: iterators
+Loading required package: parallel
+> # Read Maxwell 67 project raw data
+> setwd("/media/user/1907USB/2020data") #TO BE CORRECTED
+> Raw <- read.csv("Maxwell/maxwell67MainCasesTrainTestV10esFin.csv", header = TRUE)
+> ## Only read the 'Train' data set,  remove case ID
+> ## Only read the 'Train' data set,  remove case ID
+> MaxwellData <-subset(Raw,case=="Train")
+> dataID<-MaxwellData$id
+> case<-MaxwellData$case
+> MaxwellData<-MaxwellData[,-(1:2)]
+> # print the summary statistics to check incorrect values
+> summary(MaxwellData)
+    correff           totfp            pcobol           ptelon       
+ Min.   :  22.0   Min.   :  18.0   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:  96.0   1st Qu.: 151.8   1st Qu.:0.1675   1st Qu.:0.00000  
+ Median : 283.0   Median : 311.0   Median :0.3200   Median :0.00000  
+ Mean   : 512.3   Mean   : 506.4   Mean   :0.3982   Mean   :0.07883  
+ 3rd Qu.: 462.2   3rd Qu.: 693.2   3rd Qu.:0.6550   3rd Qu.:0.00000  
+ Max.   :3031.0   Max.   :2328.0   Max.   :1.0000   Max.   :0.87000  
+                                                                     
+     peasy              pjcl              t             ageend     
+ Min.   :0.00000   Min.   :0.0000   Min.   :1.000   Min.   : 8.00  
+ 1st Qu.:0.00000   1st Qu.:0.2850   1st Qu.:3.000   1st Qu.:23.75  
+ Median :0.02000   Median :0.3900   Median :3.000   Median :36.00  
+ Mean   :0.08767   Mean   :0.4353   Mean   :3.296   Mean   :37.15  
+ 3rd Qu.:0.15000   3rd Qu.:0.5650   3rd Qu.:4.000   3rd Qu.:48.50  
+ Max.   :0.52000   Max.   :1.0000   Max.   :4.000   Max.   :85.00  
+                                    NA's   :6                      
+    avetrans          disksp              cpu               r1            r2      
+ Min.   :  0.00   Min.   :    0.00   Min.   :   0.0   Min.   :1.0   Min.   :1.00  
+ 1st Qu.:  0.00   1st Qu.:   50.75   1st Qu.:  18.5   1st Qu.:3.0   1st Qu.:1.00  
+ Median :  1.00   Median :  206.50   Median :  77.0   Median :4.0   Median :3.00  
+ Mean   : 14.52   Mean   : 1940.95   Mean   : 314.4   Mean   :3.4   Mean   :2.68  
+ 3rd Qu.:  7.25   3rd Qu.:  884.25   3rd Qu.: 284.5   3rd Qu.:4.0   3rd Qu.:4.00  
+ Max.   :345.00   Max.   :39013.00   Max.   :2197.0   Max.   :5.0   Max.   :5.00  
+                                                      NA's   :10    NA's   :10    
+       r3             r4             r5             r6             r7      
+ Min.   :1.00   Min.   :1.00   Min.   :1.00   Min.   :1.00   Min.   :1.00  
+ 1st Qu.:1.00   1st Qu.:2.00   1st Qu.:1.00   1st Qu.:2.00   1st Qu.:4.00  
+ Median :2.00   Median :2.00   Median :2.00   Median :2.00   Median :4.00  
+ Mean   :2.46   Mean   :2.36   Mean   :2.16   Mean   :1.96   Mean   :4.08  
+ 3rd Qu.:3.75   3rd Qu.:3.00   3rd Qu.:3.00   3rd Qu.:2.00   3rd Qu.:5.00  
+ Max.   :5.00   Max.   :4.00   Max.   :4.00   Max.   :4.00   Max.   :5.00  
+ NA's   :10     NA's   :10     NA's   :10     NA's   :10     NA's   :10    
+       r8            r9           r10           appdef            borg   
+ Min.   :1.0   Min.   :1.0   Min.   :1.00   Min.   :  0.00          : 0  
+ 1st Qu.:1.0   1st Qu.:3.0   1st Qu.:1.00   1st Qu.:  0.00   BigCorp: 9  
+ Median :3.0   Median :4.0   Median :1.00   Median :  3.00   Corp   :18  
+ Mean   :2.9   Mean   :3.7   Mean   :1.78   Mean   : 10.28   Group  :10  
+ 3rd Qu.:4.0   3rd Qu.:5.0   3rd Qu.:3.00   3rd Qu.: 11.00   InHServ: 1  
+ Max.   :5.0   Max.   :5.0   Max.   :3.00   Max.   :163.00   ITServ : 3  
+ NA's   :10    NA's   :10    NA's   :10                      Retail :19  
+       morg       apptype     dbms        tpms   
+ Account :10          : 0       : 8         : 1  
+ SecTrade: 9   BackOff:14   DB2 :50   BATCH : 7  
+ Payment : 8   Connect:18   IDSN: 2   IIMS  : 2  
+ Treasury: 7   Core   :27             IMS   :47  
+ Deposit : 6   InfServ: 1             PTCICS: 2  
+ payment : 6                          RECICS: 1  
+ (Other) :14                                     
+> # apply Box Cox transformations to biased non-cat predictors
+> ### Section 3.2 Data Transformations for Individual Predictors
+> library(e1071)
+> skewness(MaxwellData$totfp)
+[1] 1.651598
+> skewValues<-apply(MaxwellData,2,skewness)
+Error in x - mean(x) : non-numeric argument to binary operator
+In addition: Warning message:
+In mean.default(x) : argument is not numeric or logical: returning NA
+> head(skewValues)
+Error in head(skewValues) : object 'skewValues' not found
+> Raw <- read.csv("Maxwell/maxwell67MainCasesTrainTestV10esFin.csv", header = TRUE)
+> ## Only read the 'Train' data set,  remove case ID
+> MaxwellTrain <-subset(Raw,case=="Train")
+> dataID<-MaxwellTrain$id
+> case<-MaxwellTrain$case
+> MaxwellTrain<-MaxwellTrain[,-(1:2)]
+> #
+> # print the summary statistics to check incorrect values
+> summary(MaxwellTrain)
+    correff           totfp            pcobol           ptelon       
+ Min.   :  22.0   Min.   :  18.0   Min.   :0.0000   Min.   :0.00000  
+ 1st Qu.:  96.0   1st Qu.: 151.8   1st Qu.:0.1675   1st Qu.:0.00000  
+ Median : 283.0   Median : 311.0   Median :0.3200   Median :0.00000  
+ Mean   : 512.3   Mean   : 506.4   Mean   :0.3982   Mean   :0.07883  
+ 3rd Qu.: 462.2   3rd Qu.: 693.2   3rd Qu.:0.6550   3rd Qu.:0.00000  
+ Max.   :3031.0   Max.   :2328.0   Max.   :1.0000   Max.   :0.87000  
+                                                                     
+     peasy              pjcl              t             ageend     
+ Min.   :0.00000   Min.   :0.0000   Min.   :1.000   Min.   : 8.00  
+ 1st Qu.:0.00000   1st Qu.:0.2850   1st Qu.:3.000   1st Qu.:23.75  
+ Median :0.02000   Median :0.3900   Median :3.000   Median :36.00  
+ Mean   :0.08767   Mean   :0.4353   Mean   :3.296   Mean   :37.15  
+ 3rd Qu.:0.15000   3rd Qu.:0.5650   3rd Qu.:4.000   3rd Qu.:48.50  
+ Max.   :0.52000   Max.   :1.0000   Max.   :4.000   Max.   :85.00  
+                                    NA's   :6                      
+    avetrans          disksp              cpu               r1            r2      
+ Min.   :  0.00   Min.   :    0.00   Min.   :   0.0   Min.   :1.0   Min.   :1.00  
+ 1st Qu.:  0.00   1st Qu.:   50.75   1st Qu.:  18.5   1st Qu.:3.0   1st Qu.:1.00  
+ Median :  1.00   Median :  206.50   Median :  77.0   Median :4.0   Median :3.00  
+ Mean   : 14.52   Mean   : 1940.95   Mean   : 314.4   Mean   :3.4   Mean   :2.68  
+ 3rd Qu.:  7.25   3rd Qu.:  884.25   3rd Qu.: 284.5   3rd Qu.:4.0   3rd Qu.:4.00  
+ Max.   :345.00   Max.   :39013.00   Max.   :2197.0   Max.   :5.0   Max.   :5.00  
+                                                      NA's   :10    NA's   :10    
+       r3             r4             r5             r6             r7      
+ Min.   :1.00   Min.   :1.00   Min.   :1.00   Min.   :1.00   Min.   :1.00  
+ 1st Qu.:1.00   1st Qu.:2.00   1st Qu.:1.00   1st Qu.:2.00   1st Qu.:4.00  
+ Median :2.00   Median :2.00   Median :2.00   Median :2.00   Median :4.00  
+ Mean   :2.46   Mean   :2.36   Mean   :2.16   Mean   :1.96   Mean   :4.08  
+ 3rd Qu.:3.75   3rd Qu.:3.00   3rd Qu.:3.00   3rd Qu.:2.00   3rd Qu.:5.00  
+ Max.   :5.00   Max.   :4.00   Max.   :4.00   Max.   :4.00   Max.   :5.00  
+ NA's   :10     NA's   :10     NA's   :10     NA's   :10     NA's   :10    
+       r8            r9           r10           appdef            borg   
+ Min.   :1.0   Min.   :1.0   Min.   :1.00   Min.   :  0.00          : 0  
+ 1st Qu.:1.0   1st Qu.:3.0   1st Qu.:1.00   1st Qu.:  0.00   BigCorp: 9  
+ Median :3.0   Median :4.0   Median :1.00   Median :  3.00   Corp   :18  
+ Mean   :2.9   Mean   :3.7   Mean   :1.78   Mean   : 10.28   Group  :10  
+ 3rd Qu.:4.0   3rd Qu.:5.0   3rd Qu.:3.00   3rd Qu.: 11.00   InHServ: 1  
+ Max.   :5.0   Max.   :5.0   Max.   :3.00   Max.   :163.00   ITServ : 3  
+ NA's   :10    NA's   :10    NA's   :10                      Retail :19  
+       morg       apptype     dbms        tpms   
+ Account :10          : 0       : 8         : 1  
+ SecTrade: 9   BackOff:14   DB2 :50   BATCH : 7  
+ Payment : 8   Connect:18   IDSN: 2   IIMS  : 2  
+ Treasury: 7   Core   :27             IMS   :47  
+ Deposit : 6   InfServ: 1             PTCICS: 2  
+ payment : 6                          RECICS: 1  
+ (Other) :14                                     
+> max(MaxwellTrain$totfp)/min(MaxwellTrain$totfp)
+[1] 129.3333
+> library(e1071)
+> skewness(MaxwellTrain$totfp)
+[1] 1.651598
+> library(caret)
+Loading required package: lattice
+Loading required package: ggplot2
+> 
+> ## Use caret's preProcess function to transform for skewness
+> segPP <- preProcess(MaxwellTrain, method = "BoxCox")
+> ## Apply the transformations
+> MaxwellTrainTrans <- predict(segPP, MaxwellTrain)
+> 
+> ## Results for a single predictor
+> segPP$bc$totfp
+Box-Cox Transformation
+
+60 data points used to estimate Lambda
+
+Input data summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   18.0   151.8   311.0   506.4   693.2  2328.0 
+
+Largest/Smallest: 129 
+Sample Skewness: 1.65 
+
+Estimated Lambda: 0.2 
+
+> histogram(~MaxwellTrain$totfp,
++           xlab = "Natural Units",
++           type = "count")
+> histogram(~log(MaxwellTrain$totfp),
++           xlab = "Log Units",
++           ylab = " ",
++           type = "count")
+> segPP$bc$correff
+Box-Cox Transformation
+
+60 data points used to estimate Lambda
+
+Input data summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   22.0    96.0   283.0   512.3   462.2  3031.0 
+
+Largest/Smallest: 138 
+Sample Skewness: 2.16 
+
+Estimated Lambda: 0 
+With fudge factor, Lambda = 0 will be used for transformations
+
+> 
+> histogram(~MaxwellTrain$correff,
++           xlab = "Natural Units",
++           type = "count")
+> 
+> histogram(~MaxwellTrainTrans$correff,
++           xlab = "Transformed Data",
++           ylab = " ",
++           type = "count")
+> #remove the non numeric columns
+> segMaxwellTrain <- MaxwellTrain[,-(23:27)]
+> View(segMaxwellTrain)
+> skewValues<-apply(segMaxwellTrain,2,skewness)
+> head(skewValues)
+  correff     totfp    pcobol    ptelon     peasy      pjcl 
+2.1598221 1.6515984 0.3738018 2.6166690 1.5401964 0.4259967 
+> skewValues
+  correff     totfp    pcobol    ptelon     peasy      pjcl         t    ageend 
+2.1598221 1.6515984 0.3738018 2.6166690 1.5401964 0.4259967        NA 0.3969066 
+ avetrans    disksp       cpu        r1        r2        r3        r4        r5 
+5.5552471 4.7945658 2.0567973        NA        NA        NA        NA        NA 
+       r6        r7        r8        r9       r10    appdef 
+       NA        NA        NA        NA        NA 4.8371954 
+> # use these values as guide , prioritize for visualizing the distribution
+> histogram(~segMaxwellTrain$avetrans,
++           xlab = "Natural Units",
++           type = "count")
+> # use these values as guide , prioritize for visualizing the distribution
+> histogram(~segMaxwellTrain$appdef,
++           xlab = "Natural Units",
++           type = "count")
+> histogram(~segMaxwellTrain$ptelon,
++           xlab = "Natural Units",
++           type = "count")
+> # BoxCoxTrans auto find the approp transformation, and apply them 
+> library(caret)
+> totfpTrans<-BoxCoxTrans(segMaxwellTrain$totfp)
+> totfpTrans
+Box-Cox Transformation
+
+60 data points used to estimate Lambda
+
+Input data summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   18.0   151.8   311.0   506.4   693.2  2328.0 
+
+Largest/Smallest: 129 
+Sample Skewness: 1.65 
+
+Estimated Lambda: 0.2 
+
+> head(MaxwellData$totfp)
+[1]  237  569  165  203  273 1748
+> predict(totfpTrans,head(segMaxwellTrain$totfp))
+[1]  9.925183 12.782485  8.882472  9.470023 10.353328 17.257598
+> #
+> avetransTrans<-BoxCoxTrans(segMaxwellTrain$avetrans)
+> avetransTrans
+Box-Cox Transformation
+
+60 data points used to estimate Lambda
+
+Input data summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+   0.00    0.00    1.00   14.52    7.25  345.00 
+
+Lambda could not be estimated; no transformation is applied
+
+> head(segMaxwellTrain$avetrans)
+[1]  0  2  7  6  0 25
+> predict(avetransTrans,head(segMaxwellTrain$avetrans))
+[1]  0  2  7  6  0 25
+> ####################
+> # use these values as guide , prioritize for visualizing the distribution
+> histogram(~segMaxwellTrain$avetrans,
++           xlab = "Natural Units",
++           type = "count")
+> # filter for near zero variance pridictors
+> nearZeroVar(segMaxwellTrain)
+integer(0)
+> #filter on between predictor correlations
+> correlations <- cor(segMaxwellTrain)
+> dim(correlations)
+[1] 22 22
+> correlations[1:6, 1:6]
+            correff      totfp      pcobol      ptelon       peasy        pjcl
+correff  1.00000000  0.5931290 -0.08762473 -0.07013446  0.36226671 -0.02411360
+totfp    0.59312898  1.0000000 -0.13417073  0.11760202  0.32708243 -0.10126857
+pcobol  -0.08762473 -0.1341707  1.00000000 -0.39707047 -0.34685465 -0.68407956
+ptelon  -0.07013446  0.1176020 -0.39707047  1.00000000 -0.10046663 -0.25202212
+peasy    0.36226671  0.3270824 -0.34685465 -0.10046663  1.00000000 -0.02368335
+pjcl    -0.02411360 -0.1012686 -0.68407956 -0.25202212 -0.02368335  1.00000000
+> #visualize
+> library(corrplot)
+corrplot 0.84 loaded
+> corrplot(correlations , order = "hclust")
+Error in hclust(as.dist(1 - corr), method = hclust.method) : 
+  NA/NaN/Inf in foreign function call (arg 11)
+> highCorr <- findCorrelation(correlations, cutoff = .75)
+> length(highCorr)
+[1] 0
+> head(highCorr)
+integer(0)
+> filteredSegMaxwellTrain <- segMaxwellTrain[ , -highCorr]
+> highCorr <- findCorrelation(correlations, cutoff = .75)
+> length(highCorr)
+[1] 0
+> head(highCorr)
+integer(0)
+> filteredSegMaxwellTrain <- segMaxwellTrain[ , -highCorr]
+> highCorr <- findCorrelation(correlations, cutoff = .75)
+> length(highCorr)
+[1] 0
+> head(highCorr)
+integer(0)
+> filteredSegMaxwellTrain <- segMaxwellTrain[ , -highCorr]
+

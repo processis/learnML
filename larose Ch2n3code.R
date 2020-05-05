@@ -91,3 +91,4 @@ t.test(churn.false$Intl.Calls,
 pairs(churn$Day.Mins + churn$Day.Calls + churn$Day.Charge)
 #
 # corr data table , p80 top
+#2020.5.3
