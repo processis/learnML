@@ -57,4 +57,6 @@ try Kuhn caret using dummy var to find the multi var LR for Maxwell 67data from
 67MainCasesAnalysis202005dummyVar
 
 
-
+## 2020.9.13
+reade HSDZ913 cleansed data, 2 scatter plots
+code and plots in learnML
