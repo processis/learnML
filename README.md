@@ -1,4 +1,4 @@
-﻿# learnML
+# learnML
 learn Machine Learning usng R
 ## 2020.3.26  
 * try maxwell326es from Shelly Minitab output
@@ -60,3 +60,8 @@ try Kuhn caret using dummy var to find the multi var LR for Maxwell 67data from
 ## 2020.9.13
 reade HSDZ913 cleansed data, 2 scatter plots
 code and plots in learnML
+
+## 2020.9.14
+P值
+直方图
+散点图
