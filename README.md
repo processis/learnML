@@ -65,3 +65,9 @@ code and plots in learnML
 P值
 直方图
 散点图
+
+## 2020.9.18
+0914HSDZ data
+P值
+直方图
+散点图
