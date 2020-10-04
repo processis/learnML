@@ -71,3 +71,11 @@ P值
 P值
 直方图
 散点图
+
+## 2020.10.4
+TODO: 16G404 SanDisk can boot 但没有自动 连上网络
+改用您 16G212 SanDisk 才可自动上网
+
+try R, output in LinRegLab20201004es.odt
+run Lander ch16, Kuhn Ch6 , Gareth ch6 codes
+try to analyse Desharnais77
