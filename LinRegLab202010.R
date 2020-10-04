@@ -79,8 +79,10 @@ housePredict <- predict(house1, newdata = housingNew, se.fit = TRUE,
 head(housePredict$fit)
 head(housePredict$se.fit)
 # complete Lander Chapter16 run
-# Read Desharnais77 public dataset from promise uottawa repository
-desh1 <- read.table("data/desharnais77.csv",
+# Read Desharnais77 and NASA93 public dataset from promise uottawa repository
+desharnais <- read.table("desharnais77.csv",
+                         sep = ",", header = TRUE)
+nasa <- read.table("cocomonasa_2.csv",
                          sep = ",", header = TRUE)
 #try Kuhn ch6 Linear Regression and cousins
 library(AppliedPredictiveModeling)
