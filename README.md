@@ -79,3 +79,11 @@ TODO: 16G404 SanDisk can boot 但没有自动 连上网络
 try R, output in LinRegLab20201004es.odt
 run Lander ch16, Kuhn Ch6 , Gareth ch6 codes
 try to analyse Desharnais77
+
+## 2020.10.6
+成功跑完 Kuhn6 LinReg , Ridge, PLS/PCR  on DesharnaisPromise dataset
+1/ ConvertDeshaData.R  to convert to solTrain and solTest data set
+2/ copy Kuhn code to Kuhn6LinRegRidgePlsPcr1006.R , removed soem irrelvant code from Kuhn6
+
+Output saved in  deshaLinRegRidgePlsPcr1006.odt
+Output PNG from 1 to 7 Desha1Rplot.png  to Desha7 ...
