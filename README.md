@@ -87,3 +87,14 @@ try to analyse Desharnais77
 
 Output saved in  deshaLinRegRidgePlsPcr1006.odt
 Output PNG from 1 to 7 Desha1Rplot.png  to Desha7 ...
+
+## 2020.10.7
+Best result in Kuhn 6 by logEFFORT , and Language=1 only
+ConvertDeshaLang1only1007.R to read   desharaisLogEffort77kaggle.... csv   or desharnaisLog77kaggle.csv (latter Log PointsAdj as well
+then run
+Kuhn6LinRegRidgeLPlsPcr1006 . R as before to get results and graphs
+some PNG in:   
+Outputs in deshaLinRegRidPlsPcrLogEffLang1only
+Outputs in deshaLinRegRidPlsPcrLogEffLogPointsLang1only
+
+also some using Lander 16 code
