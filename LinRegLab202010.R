@@ -16,11 +16,11 @@ names(housing) <- c("Neighborhood", "Class", "Units", "YearBuilt",
                     "ValuePerSqFt", "Boro")
 head(housing)
 ggplot(housing, aes (x = ValuePerSqFt)) +
-  geom_histogram(binwidth = 10) + labs(x = "Value per Square Foot")
+  geom_histogram(binwidth = 100) + labs(x = "Value per Square Foot")
 ggplot(housing, aes(x = ValuePerSqFt, fill = Boro)) +
-  geom_histogram(binwidth = 10) + labs(x = "Value Per Square Foot")
+  geom_histogram(binwidth = 100) + labs(x = "Value Per Square Foot")
 ggplot(housing, aes(x = ValuePerSqFt, fill = Boro)) +
-  geom_histogram(binwidth = 10) + labs(x = "Value per Square Foot") +
+  geom_histogram(binwidth = 100) + labs(x = "Value per Square Foot") +
   facet_wrap(~Boro)
 ggplot(housing,aes(x = SqFt)) + geom_histogram()
 ggplot(housing, aes(x = Units)) + geom_histogram()

@@ -12,7 +12,7 @@ xyplot(solTrainY ~ solTrainX$Transactions, type = c("p", "g"),
        ylab = "Effort",
        xlab = "Trans")
 
-
+library(caret)
 library(corrplot)
 corrplot::corrplot(cor(solTrainXtrans), 
                    order = "hclust", 
