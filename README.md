@@ -105,3 +105,8 @@ data desharnaisLogEffort77kaggleLang3.csv
 code converdeshalang31009.R
 result desharnaisLogEffort77kaggleLang3.odt
 
+##2020.10.11
+rerun Language =1
+3 Lang using dummy variables as in 1009
+compute TestResults, save as TestResultsDummy1011 and TestResults3Lang1011
+
