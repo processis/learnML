@@ -100,12 +100,12 @@ Outputs in deshaLinRegRidPlsPcrLogEffLogPointsLang1only
 also some using Lander 16 code
 
 
-##1009 
+## 1009 
 data desharnaisLogEffort77kaggleLang3.csv
 code converdeshalang31009.R
 result desharnaisLogEffort77kaggleLang3.odt
 
-##2020.10.11
+## 2020.10.11
 
 rerun 
 3 Lang using dummy variables as in 1009
