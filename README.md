@@ -106,7 +106,16 @@ code converdeshalang31009.R
 result desharnaisLogEffort77kaggleLang3.odt
 
 ##2020.10.11
-rerun Language =1
+
+rerun 
 3 Lang using dummy variables as in 1009
 compute TestResults, save as TestResultsDummy1011 and TestResults3Lang1011
+
+rerun Lang=1 only 
+
+rerun Deshanarais77kaggle origina DataSet,
+ Effort as it is , no Log
+  Lang , as it is , 1 , 2,3
+  
+  Exported all TestResults 
 
