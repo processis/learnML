@@ -14,7 +14,8 @@ xyplot(solTrainY ~ solTrainX$Transactions, type = c("p", "g"),
 
 library(caret)
 library(corrplot)
-corrplot::corrplot(cor(solTrainXtrans), 
+#look at both X and Y variables, so look at deshaTrain instead of solTrainXtrans
+corrplot::corrplot(cor(deshaTrain), 
                    order = "hclust", 
                    tl.cex = .8)
 

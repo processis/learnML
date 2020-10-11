@@ -183,7 +183,7 @@ rfTune <- train(x = solTrainXtrans, y = solTrainY,
 rfTune
 
 plot(rfTune)
-
+testResults$RF <- predict(rfTune, solTestXtrans) #add RF predict results
 rfImp <- varImp(rfTune, scale = FALSE)
 rfImp
 
@@ -258,7 +258,10 @@ plot(cubistTune, auto.key = list(columns = 4, lines = TRUE))
 cbImp <- varImp(cubistTune, scale = FALSE)
 cbImp
 
+testResults$CUBIST <- predict(cubistTune, solTestXtrans) #add result of CUBIST
+
 ################################################################################
+write.table(testResults,file="testResults.csv",sep=",") # output testResults.csv
 ### Session Information
 
 sessionInfo()

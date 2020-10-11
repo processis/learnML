@@ -56,7 +56,7 @@ ctrl <- trainControl(method = "cv", index = indx)
 ### 2677M/core.
 
 library(doMC)
-registerDoMC(10)
+registerDoMC(2)
 
 
 library(caret)
@@ -133,6 +133,9 @@ plot(svmPTune,
 
 testResults$SVMr <- predict(svmRTune, solTestXtrans)
 testResults$SVMp <- predict(svmPTune, solTestXtrans)
+
+################################################################################
+write.table(testResults,file="testResults.csv",sep=",") # output testResults.csv
 
 ################################################################################
 ### Section 7.4 K-Nearest Neighbors
