@@ -119,3 +119,7 @@ rerun Deshanarais77kaggle origina DataSet,
   
   Exported all TestResults 
 
+## 2020.10.18
+hsdz1018es datasets
+ConvertHsdz1018 to get a hsdzSummary , hsdzIter
+updated Kuhn6LinReg...1018.R
