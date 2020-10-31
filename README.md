@@ -131,13 +131,18 @@ learnMatloffCh12 (from the book)
 1/All lang as 123 , use effort as is , deshar...77kaggle
    convert ...1008.R
    kuhn6...1006.R
+   
 2/ Log Effort
      desh..LogEffort77kaggle.csv
+     
 3/ Log Effort, Lang1 2 as dummy var
      desh..LogEff77kaggleLang3.csv
      Conv...Lang12dummy1031.R
+     
 4/ Log Effort, Lang1 only
       desh..Log..    lang3.csv
       Conv.... Lang1only1031.R
+      
  Kuhn_6LinReg..PlsPcs1031.R
+ 
  Kuhn07..Cubist.R
