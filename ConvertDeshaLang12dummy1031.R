@@ -31,12 +31,12 @@ deshaTestY = deshaTest$Effort
 #remove Effort from X set
 deshaTrainX = deshaTrain[,c(1:3,5:9)]
 deshaTestX = deshaTest[,c(1:3,5:9)]
-solTestY = deshaTestY
-solTrainY = deshaTrainY
-solTrainX = deshaTrainX
-solTestX = deshaTestX
-solTrainXtrans = deshaTrainX
-solTestXtrans = deshaTestX
+swEngTestY = deshaTestY
+swEngTrainY = deshaTrainY
+swEngTrainX = deshaTrainX
+swEngTestX = deshaTestX
+swEngTrainXtrans = deshaTrainX
+swEngTestXtrans = deshaTestX
 ###
 #
 #

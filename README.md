@@ -146,3 +146,18 @@ learnMatloffCh12 (from the book)
  Kuhn_6LinReg..PlsPcs1031.R
  
  Kuhn07..Cubist.R
+
+#20201104
+Kuhn6LinRegRidgePlsPcr11.4S.R
+
+Kuhn07_Non-Linear_RegRfCubist1104S.R
+
+10_Case_Study_Concrete.R
+
+#20201105
+ConvertDeshaLang12dummy1031.R
+
+Kuhn07_Non-Linear_RegRfCubist.1104S.R
+Kuhn07_Non-Linear_RegRfCubist.R
+
+Kuhn6LinRegRidgePlsPcr1105.R
