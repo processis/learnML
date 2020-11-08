@@ -174,3 +174,9 @@ Convert..DummyLang12only....R
    
 Convert...Lang1only1107e.R 
    no change to Kuhn6  Kuhn7
+
+
+## 2020.11.8
+try lander ch16 multi regression
+16.2..mulitpleRegression...1108es.R
+using LogEffort77kaggle.csv dataset
