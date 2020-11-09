@@ -180,3 +180,6 @@ Convert...Lang1only1107e.R
 try lander ch16 multi regression
 16.2..mulitpleRegression...1108es.R
 using LogEffort77kaggle.csv dataset
+
+## 2020.11.9
+desha lm 1110Vs.R
