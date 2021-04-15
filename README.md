@@ -146,3 +146,43 @@ learnMatloffCh12 (from the book)
  Kuhn_6LinReg..PlsPcs1031.R
  
  Kuhn07..Cubist.R
+
+## 2020.11.4
+Kuhn6LinRegRidgePlsPcr11.4S.R
+
+Kuhn07_Non-Linear_RegRfCubist1104S.R
+
+10_Case_Study_Concrete.R
+
+## 2020.11.5
+ConvertDeshaLang12dummy1031.R
+
+Kuhn07_Non-Linear_RegRfCubist.1104S.R
+Kuhn07_Non-Linear_RegRfCubist.R
+
+Kuhn6LinRegRidgePlsPcr1105.R
+
+## 2020.11.7
+deshRandomFrShelly1106.csv , same as 11.6 randomized dataset: rows 40, 45, 67, 76 to be deleted
+
+Convert...DummyLang123TOswEng1107.R
+Kuhn6.... 1105.R
+Kuhn07...1104S.R
+
+Convert..DummyLang12only....R
+   no change to Kuhn6  Kuhn7
+   
+Convert...Lang1only1107e.R 
+   no change to Kuhn6  Kuhn7
+
+
+## 2020.11.8
+try lander ch16 multi regression
+16.2..mulitpleRegression...1108es.R
+using LogEffort77kaggle.csv dataset
+
+## 2020.11.9
+desha lm 1110Vs.R
+
+## 2021.4.15
+try sync with Rstudio after rerun Desha Lang1 only and dummy
