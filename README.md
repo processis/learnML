@@ -183,3 +183,6 @@ using LogEffort77kaggle.csv dataset
 
 ## 2020.11.9
 desha lm 1110Vs.R
+
+## 2021.4.15
+try sync with Rstudio after rerun Desha Lang1 only and dummy
