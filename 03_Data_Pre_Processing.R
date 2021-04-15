@@ -82,6 +82,11 @@ histogram(~segTrainTrans$PerimCh1,
           xlab = "Transformed Data",
           ylab = " ",
           type = "count")
+#####
+###
+##
+#
+
 
 ################################################################################
 ### Section 3.3 Data Transformations for Multiple Predictors

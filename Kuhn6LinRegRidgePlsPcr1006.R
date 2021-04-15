@@ -108,3 +108,6 @@ xyplot(RMSE ~ ncomp,
 plsImp <- varImp(plsTune, scale = FALSE)
 plot(plsImp, top = 25, scales = list(y = list(cex = .95)))
 ###
+################################################################################
+write.table(testResults,file="testResultsLmPlsPcr.csv",sep=",") # output testResults.csv
+### Session Information0

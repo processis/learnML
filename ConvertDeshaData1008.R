@@ -1,5 +1,5 @@
 # Read Desharnais77 public dataset from promise uottawa repository
-desharnais <- read.table("desharnais77kaggle.csv",
+desharnais <- read.table("desharnaisLogEffort77kaggle.csv",
                          sep = ",", header = TRUE)
 desha <- subset(desharnais,Project!=38)
 # continue to remove 38 , 44, 66, 75 because not enough data in these projects
