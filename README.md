@@ -193,4 +193,5 @@ upload DPPSS R code
 ## 2021.09.18
 commit DPPSSdataV01-0918.csv DPPSSdataV01-0918.xls  -1 0 1
 commit DPPSS_SQcode-0918.R   spearman cars code susses
-ready to leave office
+
+used SSH instead of HTTPS, steps in MA GitHub page
