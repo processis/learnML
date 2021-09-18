@@ -62,7 +62,7 @@ y <- DPPSSdata1$Ship
 z<-DPPSSdata1$Maint
 w<-DPPSSdata1$FieldedVolatility
 cor(x,y,method="pearson")
-cor(z,w,method="spearman")
+cor(x,y,method="spearman")
 cor(x,y,method="kendall")
 
 attach(DPPSSdata)
