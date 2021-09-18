@@ -6,7 +6,7 @@ fix(Smarket)
 
 #读入数据 DPPSSdata.csv
 DPPSSdata=read.csv("DPPSSdata.csv")
-DPPSSdata1=read.csv("DPPSSdata1-0918.csv")
+DPPSSdata1=read.csv("DPPSSdataV01-0918.csv")
 fix(DPPSSdata)
 fix(DPPSSdata1)
 names(DPPSSdata)
@@ -18,22 +18,22 @@ summary(DPPSSdata$FormalUnitTest)
 
 #条形图 直方图等
 
-barplot(table(DPPSSdata$Language),main="Machine Language",names=c("C","C++","JAVA"))
-barplot(table(DPPSSdata$DevPlatform),main="DevPlatform",names=c("Windows","Unix","Linux"))
-hist(DPPSSdata$Maint)#必须为数值
+barplot(table(DPPSSdata1$Language),main="Machine Language",names=c("C","C++","JAVA"))
+barplot(table(DPPSSdata1$DevPlatform),main="DevPlatform",names=c("Windows","Unix","Linux"))
+hist(DPPSSdata1$Maint)#必须为数值
 
 ##散点图
 library(graphics)
-a <- DPPSSdata$Turnover
-b <- DPPSSdata$CSat
+a <- DPPSSdata1$Turnover
+b <- DPPSSdata1$CSat
 plot(a,b)
 
 #简单线性回归分析
-a <- DPPSSdata$ChangedPriorityReqs
-b <- DPPSSdata$D.KSLOC
-c<-DPPSSdata$Test.internal
-d<-DPPSSdata$Test.outside
-e<-DPPSSdata$Test.user
+a <- DPPSSdata1$ChangedPriorityReqs
+b <- DPPSSdata1$D.KSLOC
+c<-DPPSSdata1$Test.internal
+d<-DPPSSdata1$Test.outside
+e<-DPPSSdata1$Test.user
 #lm.fit=lm(r1~r2,data=Analysis1)
 lm.fit=lm(b~c +d +e +a)
 lm.fit
@@ -57,10 +57,10 @@ y <- DPPSSdata1[,c("Ship","CSa","SchedOntime","ReUse","DefectsInspect","DefectsT
                   "Language","DevPlatform","Turnover","ReqVolatility","Parts ","FormalUnitTest","IntegrationTest","SystemTest","UserTrials","BudgetLoss","ScheduleAchievement","DKSLOC",
                   "CustomerBetaTest","TesterType","ChangedPriorityReqs")]
 
-x <- DPPSSdata$CSat
-y <- DPPSSdata$Ship
-z<-DPPSSdata$Maint
-w<-DPPSSdata$FieldedVolatility
+x <- DPPSSdata1$CSat
+y <- DPPSSdata1$Ship
+z<-DPPSSdata1$Maint
+w<-DPPSSdata1$FieldedVolatility
 cor(x,y,method="pearson")
 cor(z,w,method="spearman")
 cor(x,y,method="kendall")
@@ -70,7 +70,7 @@ plot(DPPSSdata$CSat)
 
 #皮尔森卡方检验
 library(stats)
-ftable=table(DPPSSdata$DefectsInspect,DPPSSdata$Experience)
+ftable=table(DPPSSdata1$DefectsInspect,DPPSSdata1$Experience)
 ftable
 mosaicplot(ftable)#绘制列联表的马赛克图
 chisq.test(ftable)#执行皮尔森卡方检验
