@@ -6,7 +6,7 @@ fix(Smarket)
 
 #读入数据 DPPSSdata.csv
 DPPSSdata=read.csv("DPPSSdata.csv")
-DPPSSdata1=read.csv("DPPSSdata1.csv")
+DPPSSdata1=read.csv("DPPSSdata1-0918.csv")
 fix(DPPSSdata)
 fix(DPPSSdata1)
 names(DPPSSdata)
