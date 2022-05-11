@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.style.use('seaborn-poster')
-%matplotlib inline
+#%matplotlib inline
 
 def FFT(x):
     """
@@ -93,4 +93,4 @@ def gen_sig(sr):
     
 # sampling rate =2048
 sr = 2048
-%timeit FFT(gen_sig(sr))
+#%timeit FFT(gen_sig(sr))

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.style.use('seaborn-poster')
-%matplotlib inline
+ #%matplotlib inline
 
 # sampling rate
 sr = 100
@@ -93,8 +93,8 @@ def gen_sig(sr):
     
 # sampling rate =2000
 sr = 2000
-%timeit DFT(gen_sig(sr))
+#%timeit DFT(gen_sig(sr))
 
 # sampling rate 20000
 sr = 20000
-%timeit DFT(gen_sig(sr))
+#%timeit DFT(gen_sig(sr))

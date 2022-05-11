@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.style.use('seaborn-poster')
-%matplotlib inline
+#%matplotlib inline
 
 # sampling rate
 sr = 2000
@@ -49,7 +49,7 @@ plt.ylabel('Amplitude')
 plt.tight_layout()
 plt.show()
 
-%timeit fft(x)
+#%timeit fft(x)
 
 from scipy.fftpack import fft, ifft
 
@@ -71,7 +71,7 @@ plt.ylabel('Amplitude')
 plt.tight_layout()
 plt.show()
 
-%timeit fft(x)
+#%timeit fft(x)
 
 import pandas as pd
 

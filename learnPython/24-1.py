@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.style.use('seaborn-poster')
-%matplotlib inline
+#%matplotlib inline
 
 x = np.linspace(0, 20, 201)
 y = np.sin(x)
