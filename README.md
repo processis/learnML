@@ -195,3 +195,5 @@ commit DPPSSdataV01-0918.csv DPPSSdataV01-0918.xls  -1 0 1
 commit DPPSS_SQcode-0918.R   spearman cars code susses
 
 used SSH instead of HTTPS, steps in MA GitHub page
+## 2022.11.17
+login to let Shelly upload
