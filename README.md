@@ -197,3 +197,8 @@ commit DPPSS_SQcode-0918.R   spearman cars code susses
 used SSH instead of HTTPS, steps in MA GitHub page
 ## 2022.11.17
 login to let Shelly upload
+
+## 2023.1.31
+encountered conflict in R pull, indicated conflict in README , but do not know how to resolve the conflict. 
+Revert rollback: tools-terminal-new termianl >git reset --hard 'SHA'
+get SHA string by Git-Diff-History , copy the SHA string of an ealier point and paste in the git command
