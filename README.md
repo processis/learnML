@@ -202,3 +202,5 @@ login to let Shelly upload
 encountered conflict in R pull, indicated conflict in README , but do not know how to resolve the conflict. 
 Revert rollback: tools-terminal-new termianl >git reset --hard 'SHA'
 get SHA string by Git-Diff-History , copy the SHA string of an ealier point and paste in the git command
+## 2025.4
+try push
